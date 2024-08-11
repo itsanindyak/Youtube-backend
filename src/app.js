@@ -9,10 +9,16 @@ app.use(
     credentials: true,
   })
 );
-
 app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ limit: "20kb", extended: true }));
 app.use(express.static("public"));
 app.use(cookieParser());
+
+// router import
+import userRouter from "./routes/user.routes.js";
+
+// routes declaration
+
+app.use("/api/v1/users", userRouter);
 
 export { app };
