@@ -1,3 +1,6 @@
+//https://chatgpt.com/share/80fd68d6-4080-48ae-8048-c57358c129ef
+
+import fs from "fs";
 class ApiError extends Error {
   constructor(
     statusCode,
@@ -20,7 +23,4 @@ class ApiError extends Error {
   }
 }
 
-
-
-
-export {ApiError}
+export { ApiError };
