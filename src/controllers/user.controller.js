@@ -234,7 +234,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   const user = await User.findById(req.user?._id);
-  const isPasswordCorrect = await user.isPasswdCorrect(oldPassword);
+  const isPasswordCorrect = await user.passwordChecker(oldPassword);
   if (!isPasswordCorrect) {
     throw new ApiError(400, "Invalid Old Password");
   }
@@ -243,7 +243,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponce(200, {}, "Passowrd change succesfully."));
+    .json(new ApiResponce(200, {}, "Password change succesfully."));
 });
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
@@ -323,13 +323,15 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 const getChannelProfile = asyncHandler(async (req, res) => {
+  console.log(req.params);
+
   const { username } = req.params;
 
   if (!username?.trim()) {
     throw new ApiError(400, "Username is missing");
   }
 
-  const channel = User.aggregate([
+  const channel = await User.aggregate([
     {
       $match: {
         username: username?.toLowerCase(),
@@ -337,7 +339,7 @@ const getChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: "Subcription",
+        from: "subcriptions",
         localField: "_id",
         foreignField: "channel",
         as: "subscribers",
@@ -345,7 +347,7 @@ const getChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
-        from: "Subcription",
+        from: "subcriptions",
         localField: "_id",
         foreignField: "subscriber",
         as: "subscribedTo",
@@ -383,7 +385,6 @@ const getChannelProfile = asyncHandler(async (req, res) => {
   if (!channel?.length) {
     throw new ApiError(404, "Channel does not exist.");
   }
-
   res
     .status(200)
     .json(

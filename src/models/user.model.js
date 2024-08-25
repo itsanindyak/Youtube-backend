@@ -56,7 +56,12 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.passwordChecker = async function (password) {
-  return await bcrypt.compare(password, this.password);
+  try {
+    return await bcrypt.compare(password, this.password);
+  } catch (error) {
+    console.error("Error comparing passwords:", error);
+    throw new Error("Error comparing passwords");
+  }
 };
 
 userSchema.methods.generateAccessToken = function () {
