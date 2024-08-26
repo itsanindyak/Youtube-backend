@@ -166,8 +166,8 @@ const logOutUser = asyncHandler(async (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -323,8 +323,6 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 const getChannelProfile = asyncHandler(async (req, res) => {
-  console.log(req.params);
-
   const { username } = req.params;
 
   if (!username?.trim()) {
