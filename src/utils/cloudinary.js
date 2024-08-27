@@ -25,7 +25,12 @@ const uploadOnCloudinary = async (localFilePath) => {
 const deleteOnCloudnary = async (cloudinaryFilePath) => {
   try {
     if (!cloudinaryFilePath) return null;
-    const response = await cloudinary.uploader.destroy(cloudinaryFilePath, {
+    const parts = cloudinaryFilePath.split("/");
+    const fileName = parts.pop();
+    const publicId = fileName?.split(".")[0];
+    const folder = parts.pop();
+    const clourPath = folder ? `${folder}/${publicId}` : publicId || "";
+    const response = await cloudinary.uploader.destroy(clourPath, {
       resource_type: "auto",
     });
 

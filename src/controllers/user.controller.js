@@ -284,6 +284,10 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   if (!avatar.url) {
     throw new ApiError(400, "Error while uploading avatar");
   }
+  console.log(req.user);
+
+  //const responce = await deleteOnCloudnary(req.user.avatar);
+  console.log(req.user.avatar);
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -292,9 +296,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
-
-  await deleteOnCloudnary(user.avatar);
-
+  console.log(user);
   return res.status(200).json(new ApiResponce(200, user, "Avatar Updated."));
 });
 
