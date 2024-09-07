@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
-import { log } from "console";
+import { Console, error, log } from "console";
 import fs from "fs";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -28,11 +28,9 @@ const deleteOnCloudnary = async (cloudinaryFilePath) => {
     const parts = cloudinaryFilePath.split("/");
     const fileName = parts.pop();
     const publicId = fileName?.split(".")[0];
-    const folder = parts.pop();
-    const clourPath = folder ? `${folder}/${publicId}` : publicId || "";
-    const response = await cloudinary.uploader.destroy(clourPath, {
-      resource_type: "auto",
-    });
+    const response = await cloudinary.uploader.destroy([publicId], {
+      type:"upload",resource_type: "image",
+    },(error,result)=>{console.log(result,"\nError: ",error)});
 
     return response;
   } catch (error) {
