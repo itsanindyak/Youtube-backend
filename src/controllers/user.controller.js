@@ -287,7 +287,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   
 
   const responce = await deleteOnCloudnary(req.user.avatar);
-  console.log(req.user.avatar);
+
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -296,7 +296,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
-  console.log(user);
+  
   return res.status(200).json(new ApiResponce(200, user, "Avatar Updated."));
 });
 
