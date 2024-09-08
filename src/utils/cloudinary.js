@@ -30,7 +30,7 @@ const deleteOnCloudnary = async (cloudinaryFilePath) => {
     const publicId = fileName?.split(".")[0];
     const response = await cloudinary.uploader.destroy([publicId], {
       type:"upload",resource_type: "image",
-    },(error,result)=>{console.log(result,"\nError: ",error)});
+    });
 
     return response;
   } catch (error) {
