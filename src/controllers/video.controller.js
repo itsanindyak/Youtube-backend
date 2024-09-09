@@ -128,6 +128,7 @@ const getVideoByID = asyncHandler(async (req, res) => {
         title: 1,
         description: 1,
         Owner: 1,
+        isPublished:1
       },
     },
   ]);
@@ -167,7 +168,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         "video : Error while uploading updated thumbnail."
       );
     } else {
-      await deleteOnCloudnary(checkVideoID.thumbnail,"image");
+      await deleteOnCloudnary(checkVideoID.thumbnail, "image");
     }
   }
 
@@ -206,4 +207,45 @@ const deleteVideo = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponce(200, deleteResponce, "Video deleted."));
 });
 
-export { publishVideo, getVideoByID, updateVideo, deleteVideo };
+const togglePublishStatus = asyncHandler(async (req, res) => {
+  const { videoID } = req.params;
+
+  // Find the video by ID to get the current isPublished value
+  const video = await Video.findById(videoID);
+  if (!video.owner.equals(req.user._id)) {
+    throw new ApiError(400, "Video owner is not matched.");
+  }
+
+  if (!video) {
+    throw new ApiError(404, "Video Not Found.");
+  }
+
+  const updatedVideo = await Video.findByIdAndUpdate(
+    videoID,
+    {
+      $set: {
+        isPublished: !video.isPublished,
+      },
+    },
+    { new: true }
+  );
+  console.log(updatedVideo);
+
+  res
+    .status(200)
+    .json(
+      new ApiResponce(
+        200,
+        updatedVideo,
+        `Video publish status updated to ${updatedVideo.isPublished ? "published" : "unpublished"}`
+      )
+    );
+});
+
+export {
+  publishVideo,
+  getVideoByID,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus,
+};
