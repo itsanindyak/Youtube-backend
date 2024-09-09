@@ -139,19 +139,20 @@ const getVideoByID = asyncHandler(async (req, res) => {
     .json(new ApiResponce(200, video[0], "Video fetched succesfully."));
 });
 const updateVideo = asyncHandler(async (req, res) => {
-  const {videoID} = req.params;
+  const { videoID } = req.params;
 
   const checkVideoID = await Video.findById(videoID);
   if (!checkVideoID) {
     throw new ApiError(400, "Video : Not Found");
   }
+  if (!checkVideoID.owner.equals(req.user._id)) {
+    throw new ApiError(400, "Video owner is not matched.");
+  }
 
   const { title, description } = req.body;
-  
+
   let updatedThumbnailLocalPath;
-  if (
-    req.file
-  ) {
+  if (req.file) {
     updatedThumbnailLocalPath = req.file?.path;
   }
   if (!title && !description && !updatedThumbnailLocalPath) {
@@ -159,18 +160,16 @@ const updateVideo = asyncHandler(async (req, res) => {
   }
   let updatedThumbnail;
   if (updatedThumbnailLocalPath || 0) {
-    updatedThumbnail = await uploadOnCloudinary(
-      updatedThumbnailLocalPath
-    );
+    updatedThumbnail = await uploadOnCloudinary(updatedThumbnailLocalPath);
     if (!updatedThumbnail) {
-      throw new ApiError(400, "video : Error while uploading updated thumbnail.");
-    }
-    else{
-      await deleteOnCloudnary(checkVideoID.thumbnail)
+      throw new ApiError(
+        400,
+        "video : Error while uploading updated thumbnail."
+      );
+    } else {
+      await deleteOnCloudnary(checkVideoID.thumbnail,"image");
     }
   }
-
-  
 
   const updateVideo = await Video.findByIdAndUpdate(
     videoID,
@@ -178,20 +177,33 @@ const updateVideo = asyncHandler(async (req, res) => {
       $set: {
         title,
         description,
-        thumbnail:updatedThumbnail?.url ||checkVideoID.thumbnail
+        thumbnail: updatedThumbnail?.url || checkVideoID.thumbnail,
       },
     },
     { new: true }
   );
-  if(!updateVideo){
-    throw new ApiError(400,"video : Video not updated.")
+  if (!updateVideo) {
+    throw new ApiError(400, "video : Video not updated.");
   }
 
-  
   res
-  .status(200)
-  .json(new ApiResponce(200,updateVideo,"Video updated succesfully."))
+    .status(200)
+    .json(new ApiResponce(200, updateVideo, "Video updated succesfully."));
 });
 
+const deleteVideo = asyncHandler(async (req, res) => {
+  const { videoID } = req.params;
+  const checkVideoID = await Video.findById(videoID);
+  if (!checkVideoID) {
+    throw new ApiError(400, "Video : Not Found");
+  }
+  if (!checkVideoID.owner.equals(req.user._id)) {
+    throw new ApiError(400, "Video owner is not matched.");
+  }
+  const deleteResponce = await Video.findByIdAndDelete(videoID);
+  await deleteOnCloudnary(deleteResponce.videofile, "video");
+  await deleteOnCloudnary(deleteResponce.thumbnail, "image");
+  res.status(200).json(new ApiResponce(200, deleteResponce, "Video deleted."));
+});
 
-export { publishVideo, getVideoByID,updateVideo };
+export { publishVideo, getVideoByID, updateVideo, deleteVideo };
