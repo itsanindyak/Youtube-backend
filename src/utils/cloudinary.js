@@ -22,15 +22,18 @@ const uploadOnCloudinary = async (localFilePath) => {
     return null;
   }
 };
-const deleteOnCloudnary = async (cloudinaryFilePath) => {
+const deleteOnCloudnary = async (cloudinaryFilePath,type) => {
   try {
     if (!cloudinaryFilePath) return null;
     const parts = cloudinaryFilePath.split("/");
     const fileName = parts.pop();
     const publicId = fileName?.split(".")[0];
-    const response = await cloudinary.uploader.destroy([publicId], {
-      type:"upload",resource_type: "image",
-    });
+    let response;
+    if (type === "video" || type === "image") {
+      response = await cloudinary.uploader.destroy([publicId], {
+        type:"upload",resource_type: `${type}`,
+      });
+    }
 
     return response;
   } catch (error) {
