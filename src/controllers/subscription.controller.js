@@ -81,7 +81,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { id } = req.params;
   if (!isValidObjectId(channelID)) {
-    throw new ApiError(400, "Check params id.");
+    throw new ApiError(400, "Check params id");
   }
   const channelList = await Subcription.aggregate([
     {
