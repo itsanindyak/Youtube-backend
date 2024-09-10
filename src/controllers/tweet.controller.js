@@ -47,7 +47,28 @@ const getUserTweets = asyncHandler(async (req, res) => {
 });
 
 const updateTweet = asyncHandler(async (req, res) => {
-  //TODO: update tweet
+  const {id} = req.params;
+  const {content} = req.body
+  const exsitingTweet = await Tweet.findById(id)
+  if(!exsitingTweet){
+    throw new ApiError(400,"Tweet not exsit")
+  }
+  if(!exsitingTweet.owner.equals(req.user._id)){
+        throw new ApiError(400,"Unauthorized request.")
+  }
+  const updatedTweet = await Tweet.findByIdAndUpdate(
+    id,
+    {
+        content
+    },
+    {
+        new:true
+    }
+  )
+
+
+
+  res.status(200).json(new ApiResponce(200,updatedTweet,"Tweet updated secessfully"))
 });
 
 const deleteTweet = asyncHandler(async (req, res) => {

@@ -10,7 +10,7 @@ const router = Router();
 
 router.route("/create").post( verifyJWT,createTweet)
 
-router.route("/update").patch(verifyJWT,updateTweet)
+router.route("/update/:id").patch(verifyJWT,updateTweet)
 
 router.route("/:id").get(getUserTweets)
 
