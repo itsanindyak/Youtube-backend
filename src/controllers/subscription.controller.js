@@ -63,7 +63,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     {
       $group: {
         _id: "$channel",
-        subscriber:{$push:"$subscribers"}
+        subscriber: { $push: "$subscribers" },
       },
     },
   ]);
@@ -73,6 +73,49 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     .json(new ApiResponce(200, subscriber[0], "Subscriber get succesfully."));
 });
 
+const getSubscribedChannels = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const channelList = await Subcription.aggregate([
+    {
+      $match: {
+        subscriber: new mongoose.Types.ObjectId(id),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "channel",
+        foreignField: "_id",
+        as: "channels",
+        pipeline: [
+          {
+            $project: {
+              fullname: 1,
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $unwind: "$channels",
+    },
+    {
+      $group: {
+        _id: "$subscriber",
+        channel: { $push: "$channels" },
+      },
+    },
+  ]);
 
+  if (!channelList) {
+    throw new ApiError(400, "Subscribed chaanel fetched failed.");
+  }
 
-export { getUserChannelSubscribers, subscriptiontoogle };
+  res
+    .status(200)
+    .json(new ApiResponce(200, channelList[0], "Channel fetched succesfully."));
+});
+
+export { getUserChannelSubscribers, subscriptiontoogle, getSubscribedChannels };
