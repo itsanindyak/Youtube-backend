@@ -229,7 +229,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
-  console.log(updatedVideo);
+
 
   res
     .status(200)
