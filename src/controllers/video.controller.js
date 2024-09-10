@@ -91,6 +91,9 @@ const getVideoByID = asyncHandler(async (req, res) => {
   if (!videoID?.trim()) {
     throw new ApiError(400, "VideoID is missing.");
   }
+  if (!isValidObjectId(videoID)) {
+    throw new ApiError(400, "Check params id.");
+  }
 
   const video = await Video.aggregate([
     {
@@ -128,7 +131,7 @@ const getVideoByID = asyncHandler(async (req, res) => {
         title: 1,
         description: 1,
         Owner: 1,
-        isPublished:1
+        isPublished: 1,
       },
     },
   ]);
@@ -141,7 +144,9 @@ const getVideoByID = asyncHandler(async (req, res) => {
 });
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoID } = req.params;
-
+  if (!isValidObjectId(videoID)) {
+    throw new ApiError(400, "Check params id.");
+  }
   const checkVideoID = await Video.findById(videoID);
   if (!checkVideoID) {
     throw new ApiError(400, "Video : Not Found");
@@ -194,6 +199,9 @@ const updateVideo = asyncHandler(async (req, res) => {
 
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoID } = req.params;
+  if (!isValidObjectId(videoID)) {
+    throw new ApiError(400, "Check params id.");
+  }
   const checkVideoID = await Video.findById(videoID);
   if (!checkVideoID) {
     throw new ApiError(400, "Video : Not Found");
@@ -209,6 +217,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoID } = req.params;
+  if (!isValidObjectId(videoID)) {
+    throw new ApiError(400, "Check params id.");
+  }
 
   // Find the video by ID to get the current isPublished value
   const video = await Video.findById(videoID);
@@ -229,7 +240,6 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
-
 
   res
     .status(200)

@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import { User } from "../models/user.model.js";
+import mongoose, { isValidObjectId } from "mongoose";
 import { Subcription } from "../models/subscription.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
@@ -7,6 +6,9 @@ import { ApiResponce } from "../utils/apiResponse.js";
 
 const subscriptiontoogle = asyncHandler(async (req, res) => {
   const { channelID } = req.params;
+  if (!isValidObjectId(channelID)) {
+    throw new ApiError(400, "Check params id.");
+  }
   const existingSubscription = await Subcription.findOneAndDelete({
     subscriber: req.user._id,
     channel: channelID,
@@ -34,6 +36,9 @@ const subscriptiontoogle = asyncHandler(async (req, res) => {
 
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  if (!isValidObjectId(channelID)) {
+    throw new ApiError(400, "Check params id.");
+  }
   const subscriber = await Subcription.aggregate([
     {
       $match: {
@@ -75,6 +80,9 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  if (!isValidObjectId(channelID)) {
+    throw new ApiError(400, "Check params id.");
+  }
   const channelList = await Subcription.aggregate([
     {
       $match: {
