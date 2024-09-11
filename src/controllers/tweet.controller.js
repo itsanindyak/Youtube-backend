@@ -1,10 +1,8 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { User } from "../models/user.model.js";
 import { Tweet } from "../models/tweet.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponce } from "../utils/apiResponse.js";
-import { json } from "express";
 
 const createTweet = asyncHandler(async (req, res) => {
   const { content } = req.body;
@@ -36,43 +34,58 @@ const getUserTweets = asyncHandler(async (req, res) => {
         owner: new mongoose.Types.ObjectId(id),
       },
     },
-    
   ]);
 
   res
     .status(200)
-    .json(
-      new ApiResponce(200, tweetList, "All tweet fetched successfully.")
-    );
+    .json(new ApiResponce(200, tweetList, "All tweet fetched successfully."));
 });
 
 const updateTweet = asyncHandler(async (req, res) => {
-  const {id} = req.params;
-  const {content} = req.body
-  const exsitingTweet = await Tweet.findById(id)
-  if(!exsitingTweet){
-    throw new ApiError(400,"Tweet not exsit")
+  const { id } = req.params;
+  const { content } = req.body;
+  const exsitingTweet = await Tweet.findById(id);
+  if (!exsitingTweet) {
+    throw new ApiError(400, "Tweet not exsit");
   }
-  if(!exsitingTweet.owner.equals(req.user._id)){
-        throw new ApiError(400,"Unauthorized request.")
+  if (!exsitingTweet.owner.equals(req.user._id)) {
+    throw new ApiError(400, "Unauthorized request.");
   }
   const updatedTweet = await Tweet.findByIdAndUpdate(
     id,
     {
-        content
+      content,
     },
     {
-        new:true
+      new: true,
     }
-  )
+  );
 
-
-
-  res.status(200).json(new ApiResponce(200,updatedTweet,"Tweet updated secessfully"))
+  res
+    .status(200)
+    .json(new ApiResponce(200, updatedTweet, "Tweet updated secessfully"));
 });
 
 const deleteTweet = asyncHandler(async (req, res) => {
   //TODO: delete tweet
+  const { id } = req.params;
+  const exsitingTweet = await Tweet.findById(id);
+  if (!exsitingTweet) {
+    throw new ApiError(400, "Tweet not exsit");
+  }
+  if (!exsitingTweet.owner.equals(req.user._id)) {
+    throw new ApiError(400, "Unauthorized request.");
+  }
+
+  const deleteResponce = await Tweet.findByIdAndDelete(id);
+
+  if (!deleteResponce) {
+    throw new ApiError(500, "Unable to delete the tweet.");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponce(200, deleteResponce, "Tweet delete succesfully."));
 });
 
 export { createTweet, getUserTweets, updateTweet, deleteTweet };

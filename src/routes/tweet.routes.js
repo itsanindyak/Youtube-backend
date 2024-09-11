@@ -14,7 +14,7 @@ router.route("/update/:id").patch(verifyJWT,updateTweet)
 
 router.route("/:id").get(getUserTweets)
 
-router.route("/delete").delete(verifyJWT,deleteTweet)
+router.route("/delete/:id").delete(verifyJWT,deleteTweet)
 
 
 export default router;
