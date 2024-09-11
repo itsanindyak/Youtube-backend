@@ -53,7 +53,6 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
   if (!isValidObjectId(id)) {
     throw new ApiError(400, "Url id not valid.");
   }
-  const existPlaylist = await Playlist.findById(id);
 
   const playlists = await Playlist.aggregate([
     {
@@ -61,7 +60,14 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
         owner: new mongoose.Types.ObjectId(id),
       },
     },
-    {},
+    {
+      $lookup: {
+        from: "videos",
+        localField: "videos",
+        foreignField: "_id",
+        as: "videos",
+      },
+    },
   ]);
   if (!playlists) {
     throw new ApiError(500, "Unable to fetched playlists,");
@@ -123,12 +129,49 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     .json(new ApiResponce(200, playlists[0], "Playlist fetched succesfully"));
 });
 
+const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
+  const { playlistId, videoId } = req.params;
 
+  if (!isValidObjectId(playlistId || !isValidObjectId(videoId))) {
+    throw new ApiError(400, "Url id is not valid");
+  }
 
+  const playlist = await Playlist.findById(playlistId);
+  if (!playlist) {
+    throw new ApiError(400, "Playlist not exist");
+  }
+  if (!playlist.owner.equals(req.user._id)) {
+    throw new ApiError(400, "Unauthorized request.");
+  }
+  if (playlist.videos.includes(videoId)) {
+    playlist.videos.push(videoId);
+  } else {
+    throw new ApiError(400, "Video not exists in the playlist.");
+  }
+
+  const updatedPlaylist = await Playlist.findByIdAndUpdate(
+    playlistId,
+    {
+      $pull: { videos: videoId },
+    },
+    { new: true }
+  );
+
+  res
+    .status(200)
+    .json(
+      new ApiResponce(
+        200,
+        updatedPlaylist,
+        "Video delete from playlist successfully"
+      )
+    );
+});
 
 export {
   createPlaylist,
   getUserPlaylists,
   addVideoToPlaylist,
   getPlaylistById,
+  removeVideoFromPlaylist,
 };

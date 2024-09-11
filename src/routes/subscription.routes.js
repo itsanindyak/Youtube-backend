@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {getUserChannelSubscribers,subscriptiontoogle,getSubscribedChannels} from "../controllers/subscription.controller.js"
+import {getUserChannelSubscribers,subscriptiontoogle,getSubscribedChannels,} from "../controllers/subscription.controller.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 
