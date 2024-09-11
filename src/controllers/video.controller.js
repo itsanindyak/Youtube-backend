@@ -3,7 +3,7 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponce } from "../utils/apiResponse.js";
 import { Video } from "../models/video.model.js";
 import { uploadOnCloudinary, deleteOnCloudnary } from "../utils/cloudinary.js";
-import mongoose from "mongoose";
+import mongoose,{isValidObjectId} from "mongoose";
 
 const publishVideo = asyncHandler(async (req, res) => {
   const { title, description, isPublished } = req.body;
