@@ -46,7 +46,6 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponce(200, playlist, "Video add succesfully"));
 });
 
-// checking
 const getUserPlaylists = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
@@ -168,10 +167,61 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     );
 });
 
+const deletePlaylist = asyncHandler(async (req, res) => {
+  const { playlistId } = req.params;
+  if (!isValidObjectId(playlistId)) {
+    throw new ApiError(400, "Id in url is not valid.");
+  }
+  const playlist = await Playlist.findById(playlistId);
+  if (!playlist) {
+    throw new ApiError(400, "Playlist not exist");
+  }
+  if (!playlist.owner.equals(req.user._id)) {
+    throw new ApiError(400, "Unauthorized request.");
+  }
+  const deletedPlaylist = await Playlist.findByIdAndDelete(playlistId);
+  if (!deletePlaylist) {
+    throw new ApiError(500, "Unable to delte Playlist");
+  }
+
+  res.status(200).json(new ApiResponce(200, deletedPlaylist, "Playlist deleted succesfully"));
+});
+
+const updatePlaylist = asyncHandler(async (req, res) => {
+  const { playlistId } = req.params;
+  const { name, description } = req.body;
+  if (!isValidObjectId(playlistId)) {
+    throw new ApiError(400, "Id in url is not valid.");
+  }
+  const playlist = await Playlist.findById(playlistId);
+  if (!playlist) {
+    throw new ApiError(400, "Playlist not exist");
+  }
+  if (!playlist.owner.equals(req.user._id)) {
+    throw new ApiError(400, "Unauthorized request.");
+  }
+
+  const updatedPlaylist = await Playlist.findByIdAndUpdate(
+    playlistId,
+    {
+      name,
+      description,
+    },
+    { new: true }
+  );
+
+  if(!updatedPlaylist){
+    throw new ApiError(500,"Unable to update playlist")
+  }
+
+  res.status(200).json(new ApiResponce(200,updatedPlaylist,"Playlist updated succesfully"))
+});
 export {
   createPlaylist,
   getUserPlaylists,
   addVideoToPlaylist,
   getPlaylistById,
   removeVideoFromPlaylist,
+  deletePlaylist,
+  updatePlaylist,
 };
