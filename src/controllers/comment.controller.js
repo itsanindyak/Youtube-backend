@@ -86,5 +86,37 @@ const deleteComment = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponce(200, deletedComment, "Comment deleted successfully"));
 });
+const getVideoComments = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const { page = 1, limit = 3 } = req.query;
 
-export {  addComment, updateComment, deleteComment };
+  // Validate that the videoId is valid
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+      throw new ApiError(400, "Invalid video ID");
+  }
+
+  // Calculate the skip value for pagination
+  const skip = (page - 1) * limit;
+
+  // Get total number of comments for this video
+  const totalComments = await Comment.countDocuments( videoId );
+
+  // Fetch the comments with pagination
+  const comments = await Comment.find( {video:videoId} )
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .skip(skip)
+      .limit(parseInt(limit));
+
+  // Return the response with pagination information
+  res.status(200).json(new ApiResponce(200, {
+      comments,
+      pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalComments / limit),
+          totalComments,
+      },
+  }, "Comments retrieved successfully"));
+});
+
+
+export {  addComment, updateComment, deleteComment,getVideoComments };

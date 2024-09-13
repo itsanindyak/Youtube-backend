@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  
+  getVideoComments,
   addComment,
   updateComment,
   deleteComment,
@@ -9,7 +9,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/add/:videoId").post(verifyJWT, addComment);
+router.route("/:videoId").post(verifyJWT, addComment).get(getVideoComments)
 router.route("/update/:commentID").patch(verifyJWT, updateComment);
 router.route("/delete/:commentID").patch(verifyJWT,deleteComment);
 
